@@ -72,8 +72,8 @@ RUN unzip -qq ${ODOO_VERSION}.zip && cd odoo-${ODOO_VERSION} && \
     rsync -a --exclude={'__pycache__','*.pyc'} ./addons/ /mnt/addons/community/
 
 # Add some scripts
-ADD ./entrypoint.sh /entrypoint.sh
-ADD ./usr/local/bin/wait-for-psql.py /usr/local/bin/wait-for-psql.py
+ADD https://raw.githubusercontent.com/odoo/docker/master/${ODOO_VERSION}/entrypoint.sh /entrypoint.sh
+ADD https://raw.githubusercontent.com/odoo/docker/master/${ODOO_VERSION}/wait-for-psql.py /usr/local/bin/wait-for-psql.py
 RUN chmod 755 /entrypoint.sh && chmod 755 /usr/local/bin/wait-for-psql.py
 
 # Clear Installation cache
