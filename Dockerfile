@@ -5,7 +5,7 @@ RUN echo "Build Odoo Community Edition"
 
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
-ENV ODOO_VERSION 17.0
+ENV ODOO_VERSION 18.0
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_RC_GROUPS options
 
@@ -70,7 +70,7 @@ FROM python:3.12-alpine AS main
 
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
-ENV ODOO_VERSION 17.0
+ENV ODOO_VERSION 18.0
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_RC_GROUPS options
 
