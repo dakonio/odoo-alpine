@@ -5,7 +5,7 @@ RUN echo "Build Odoo Community Edition"
 
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
-ENV ODOO_VERSION 15.0
+ENV ODOO_VERSION 16.0
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_RC_GROUPS options
 
