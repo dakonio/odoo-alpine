@@ -1,4 +1,4 @@
-FROM python:3.10-alpine AS builder
+FROM python:3.12-alpine AS builder
 LABEL maintainer="fanani.mi@gmail.com"
 
 RUN echo "Build Odoo Community Edition"
@@ -34,8 +34,6 @@ RUN apk add -q --no-cache \
     libxml2-dev \
     libxrender \
     libxslt-dev \
-    nodejs \
-    npm \
     openldap-dev \
     postgresql-dev \
     py3-pip \
@@ -43,9 +41,6 @@ RUN apk add -q --no-cache \
     rsync \
     zlib \
     zlib-dev
-
-# Install node dependencies
-RUN npm install -g less rtlcss postcss
 
 # Create addons directory
 RUN mkdir /mnt/addons
@@ -56,17 +51,7 @@ RUN unzip -qq ${ODOO_VERSION}.zip && cd odoo-${ODOO_VERSION} && \
     pip3 install -q --upgrade pip && \
     pip3 install -q --upgrade setuptools && \
     echo 'INPUT ( libldap.so )' > /usr/lib/libldap_r.so && \
-    sed -i "/gevent==21.8.0 ; python_version > '3.9'  # (Jammy)/d" requirements.txt && \
-    sed -i "/greenlet==1.1.2 ; python_version  > '3.9'  # (Jammy)/d" requirements.txt && \
-    sed -i "/lxml==4.6.5 ; sys_platform != 'win32' and python_version > '3.7'  # min version = 4.5.0 (Focal - with security backports)/d" requirements.txt && \
-    sed -i "/psycopg2==2.8.5; sys_platform == 'win32' or python_version >= '3.8'/d" requirements.txt && \
-    sed -i "/reportlab==3.5.55; python_version >= '3.8'/d" requirements.txt && \
     pip3 install -q --no-cache-dir -r requirements.txt && \
-    pip3 install gevent==24.2.1 -q --no-cache-dir && \
-    pip3 install greenlet==3.1.1 -q --no-cache-dir && \
-    pip3 install lxml==4.9.3 -q --no-cache-dir && \
-    pip3 install psycopg2==2.9.2 -q --no-cache-dir && \
-    pip3 install reportlab==4.1.0 -q --no-cache-dir && \
     python3 setup.py install && \
     mkdir -p /mnt/addons/community && \
     rsync -a --exclude={'__pycache__','*.pyc'} ./addons/ /mnt/addons/community/
@@ -81,7 +66,7 @@ RUN find /usr/local \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*
     find /mnt/addons \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + && \
     rm -rf /build
 
-FROM python:3.10-alpine AS main
+FROM python:3.12-alpine AS main
 
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
@@ -95,15 +80,15 @@ COPY --from=builder /lib /lib
 COPY --from=builder /usr /usr
 
 # add wkhtmltopdf
-COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/wkhtmltopdf /bin/wkhtmltopdf
-COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/wkhtmltoimage /bin/wkhtmltoimage
-COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/libwkhtmltox.so /bin/libwkhtmltox.so
-COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/libwkhtmltox.so.0 /bin/libwkhtmltox.so.0
-COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/libwkhtmltox.so.0.12 /bin/libwkhtmltox.so.0.12
-COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/libwkhtmltox.so.0.12.6 /bin/libwkhtmltox.so.0.12.6
-COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /lib/libssl.so.1.1 /lib/libssl.so.1.1
-COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /lib/libcrypto.so.1.1 /lib/libcrypto.so.1.1
-COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /usr/share/fonts /usr/share/fonts
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/wkhtmltopdf /bin/wkhtmltopdf
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/wkhtmltoimage /bin/wkhtmltoimage
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/libwkhtmltox.so /bin/libwkhtmltox.so
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/libwkhtmltox.so.0 /bin/libwkhtmltox.so.0
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/libwkhtmltox.so.0.12 /bin/libwkhtmltox.so.0.12
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/libwkhtmltox.so.0.12.6 /bin/libwkhtmltox.so.0.12.6
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /lib/libssl.so.1.1 /lib/libssl.so.1.1
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /lib/libcrypto.so.1.1 /lib/libcrypto.so.1.1
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /usr/share/fonts /usr/share/fonts
 
 # Install some dependencies
 RUN apk add -q --no-cache \
