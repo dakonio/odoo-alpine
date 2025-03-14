@@ -85,7 +85,7 @@ FROM python:3.10-alpine AS main
 
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
-ENV ODOO_VERSION 14.0
+ENV ODOO_VERSION 15.0
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_RC_GROUPS options
 
@@ -133,6 +133,7 @@ COPY --from=builder --chown=odoo:odoo /entrypoint.sh /entrypoint.sh
 COPY --chown=odoo:odoo /etc/odoo/odoo.conf /etc/odoo/odoo.conf
 COPY --chown=odoo:odoo /usr/local/bin/write-config.py /usr/local/bin/write-config.py
 RUN sed -i "s/set -e/set -e \nwrite-config.py/g" /entrypoint.sh
+
 
 # Expose web service
 USER odoo
