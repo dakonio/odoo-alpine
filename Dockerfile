@@ -134,6 +134,7 @@ COPY --chown=odoo:odoo /etc/odoo/odoo.conf /etc/odoo/odoo.conf
 COPY --chown=odoo:odoo /usr/local/bin/write-config.py /usr/local/bin/write-config.py
 RUN sed -i "s/set -e/set -e \nwrite-config.py/g" /entrypoint.sh
 
+
 # Expose web service
 USER odoo
 EXPOSE 8069 8072
