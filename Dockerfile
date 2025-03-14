@@ -60,14 +60,12 @@ RUN unzip -qq ${ODOO_VERSION}.zip && cd odoo-${ODOO_VERSION} && \
     sed -i "/gevent==21.8.0 ; sys_platform != 'win32' and python_version > '3.9' and python_version < '3.12' # (Jammy)/d" requirements.txt && \
     sed -i "/greenlet==1.1.2 ; sys_platform != 'win32' and python_version > '3.9' and python_version < '3.12' # (Jammy)/d" requirements.txt && \
     sed -i "/lxml==4.6.5; python_version < '3.12' # min version = 4.5.0 (Focal - with security backports)/d" requirements.txt && \
-    sed -i "/psycopg2==2.8.6; python_version >= '3.8' and python_version < '3.12'/d" requirements.txt && \
     sed -i "/reportlab==3.5.59 ; python_version < '3.12' # version < 3.5.54 are not compatible with Pillow 8.1.2 and 3.5.59 is bullseye/d" requirements.txt && \
     pip3 install -q --no-cache-dir -r requirements.txt && \
     pip3 install cryptography==3.4.8 -q --no-cache-dir && \
     pip3 install gevent==24.2.1 -q --no-cache-dir && \
     pip3 install greenlet==3.1.1 -q --no-cache-dir && \
     pip3 install lxml==4.9.3 -q --no-cache-dir && \
-    pip3 install psycopg2==2.9.2 -q --no-cache-dir && \
     pip3 install reportlab==4.1.0 -q --no-cache-dir && \
     python3 setup.py install && \
     mkdir -p /mnt/addons/community && \
