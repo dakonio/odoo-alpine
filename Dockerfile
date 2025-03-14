@@ -1,26 +1,22 @@
-FROM python:3.10-alpine as builder
-LABEL maintainer="Fanani M. Ihsan"
+FROM python:3.10-alpine AS builder
+LABEL maintainer="fanani.mi@gmail.com"
+
+RUN echo "Build Odoo Community Edition"
 
 ENV LANG C.UTF-8
+ENV PYTHONUNBUFFERED 1
 ENV ODOO_VERSION 15.0
 ENV ODOO_RC /etc/odoo/odoo.conf
+ENV ODOO_RC_GROUPS options
 
 WORKDIR /build
 
 # Install some dependencies
-RUN apk add --no-cache \
+RUN apk add -q --no-cache \
     bash \
     build-base \
-    cargo \
     ca-certificates \
-    cairo-dev \
-    fontconfig \
-    font-noto-cjk \
-    freetype \
-    freetype-dev \
-    grep \
     jpeg-dev \
-    icu-data-full \
     libev-dev \
     libevent-dev \
     libffi-dev \
@@ -28,7 +24,9 @@ RUN apk add --no-cache \
     libjpeg-turbo-dev \
     libpng \
     libpng-dev \
+    libpq \
     libpq-dev \
+    libssl3 \
     libstdc++ \
     libx11 \
     libxcb \
@@ -36,87 +34,108 @@ RUN apk add --no-cache \
     libxml2-dev \
     libxrender \
     libxslt-dev \
-    musl-dev \
     nodejs \
     npm \
     openldap-dev \
-    openssl-dev \
     postgresql-dev \
-    py-pip \
+    py3-pip \
     python3-dev \
-    ttf-dejavu \
-    ttf-droid \
-    ttf-freefont \
-    ttf-liberation \
+    rsync \
     zlib \
     zlib-dev
 
+# Install node dependencies
 RUN npm install -g less rtlcss postcss
-COPY --from=madnight/alpine-wkhtmltopdf-builder:0.12.5-alpine3.10 /bin/wkhtmltopdf /bin/wkhtmltopdf
-COPY --from=madnight/alpine-wkhtmltopdf-builder:0.12.5-alpine3.10 /bin/wkhtmltoimage /bin/wkhtmltoimage
 
-# Add Core Odoo
+# Create addons directory
+RUN mkdir /mnt/addons
+
+# Add Odoo Community
 ADD https://github.com/odoo/odoo/archive/refs/heads/${ODOO_VERSION}.zip .
-RUN unzip ${ODOO_VERSION}.zip
-RUN echo 'INPUT ( libldap.so )' > /usr/lib/libldap_r.so
-RUN sed -i "s/cryptography==2.6.1/cryptography==2.6.1 ; python_version <= '3.9'\ncryptography==3.3.2 ; python_version > '3.10'  # (Fanani)/g" odoo-${ODOO_VERSION}/requirements.txt
-RUN pip install --upgrade setuptools && pip install --upgrade pip && pip install --upgrade wheel
-RUN pip install -r odoo-${ODOO_VERSION}/requirements.txt
-RUN cd odoo-${ODOO_VERSION} && python setup.py install
+RUN unzip -qq ${ODOO_VERSION}.zip && cd odoo-${ODOO_VERSION} && \
+    pip3 install -q --upgrade pip && \
+    pip3 install -q --upgrade setuptools && \
+    echo 'INPUT ( libldap.so )' > /usr/lib/libldap_r.so && \
+    sed -i "/gevent==21.8.0 ; python_version > '3.9'  # (Jammy)/d" requirements.txt && \
+    sed -i "/greenlet==1.1.2 ; python_version  > '3.9'  # (Jammy)/d" requirements.txt && \
+    sed -i "/lxml==4.6.5 ; sys_platform != 'win32' and python_version > '3.7'  # min version = 4.5.0 (Focal - with security backports)/d" requirements.txt && \
+    sed -i "/psycopg2==2.8.5; sys_platform == 'win32' or python_version >= '3.8'/d" requirements.txt && \
+    sed -i "/reportlab==3.5.55; python_version >= '3.8'/d" requirements.txt && \
+    pip3 install -q --no-cache-dir -r requirements.txt && \
+    pip3 install gevent==24.2.1 -q --no-cache-dir && \
+    pip3 install greenlet==3.1.1 -q --no-cache-dir && \
+    pip3 install lxml==4.9.3 -q --no-cache-dir && \
+    pip3 install psycopg2==2.9.2 -q --no-cache-dir && \
+    pip3 install reportlab==4.1.0 -q --no-cache-dir && \
+    python3 setup.py install && \
+    mkdir -p /mnt/addons/community && \
+    rsync -a --exclude={'__pycache__','*.pyc'} ./addons/ /mnt/addons/community/
 
-# Fix alpine python path
-ADD https://raw.githubusercontent.com/odoo/docker/master/${ODOO_VERSION}/entrypoint.sh /usr/local/bin/odoo.sh
-ADD https://raw.githubusercontent.com/odoo/docker/master/${ODOO_VERSION}/wait-for-psql.py /usr/local/bin/wait-for-psql.py
+# Add some scripts
+ADD ./entrypoint.sh /entrypoint.sh
+ADD ./usr/local/bin/wait-for-psql.py /usr/local/bin/wait-for-psql.py
+RUN chmod 755 /entrypoint.sh && chmod 755 /usr/local/bin/wait-for-psql.py
 
 # Clear Installation cache
-RUN mkdir -p /mnt/addons && mv /build/odoo-${ODOO_VERSION}/addons /mnt/addons/community && rm -rf /build
+RUN find /usr/local \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + && \
+    find /mnt/addons \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + && \
+    rm -rf /build
 
-FROM python:3.10-alpine as main
+FROM python:3.10-alpine AS main
+
+ENV LANG C.UTF-8
+ENV PYTHONUNBUFFERED 1
+ENV ODOO_VERSION 14.0
+ENV ODOO_RC /etc/odoo/odoo.conf
+ENV ODOO_RC_GROUPS options
+
+# Copy base libs
+COPY --from=builder /bin /bin
+COPY --from=builder /lib /lib
+COPY --from=builder /usr /usr
+
+# add wkhtmltopdf
+COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/wkhtmltopdf /bin/wkhtmltopdf
+COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/wkhtmltoimage /bin/wkhtmltoimage
+COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/libwkhtmltox.so /bin/libwkhtmltox.so
+COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/libwkhtmltox.so.0 /bin/libwkhtmltox.so.0
+COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/libwkhtmltox.so.0.12 /bin/libwkhtmltox.so.0.12
+COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /bin/libwkhtmltox.so.0.12.6 /bin/libwkhtmltox.so.0.12.6
+COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /lib/libssl.so.1.1 /lib/libssl.so.1.1
+COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /lib/libcrypto.so.1.1 /lib/libcrypto.so.1.1
+COPY --from=ghcr.io/surnet/alpine-python-wkhtmltopdf:3.10.6-0.12.6-full /usr/share/fonts /usr/share/fonts
 
 # Install some dependencies
-RUN apk add --no-cache \
+RUN apk add -q --no-cache \
     bash \
     fontconfig \
     font-noto-cjk \
-    freetype \
-    nginx \
-    syslog-ng \
-    ttf-dejavu \
-    ttf-droid \
-    ttf-freefont \
-    ttf-liberation
+    libpq \
+    libxrender \
+    sassc
 
-# Copy base libs
-COPY --from=builder /lib /lib
-COPY --from=builder /var/lib /var/lib
-COPY --from=builder /usr/lib /usr/lib
-COPY --from=builder /usr/local/lib /usr/local/lib
-COPY --from=builder /bin /bin
-COPY --from=builder /usr/bin /usr/bin
-COPY --from=builder /usr/local/bin /usr/local/bin
-COPY --from=builder /sbin /sbin
-COPY --from=builder /usr/sbin /usr/sbin
+# prepare default user
+RUN addgroup \
+    --gid 1000 \
+    odoo
+RUN adduser \
+    --uid 1000 \
+    --ingroup odoo \
+    --home /var/lib/odoo \
+    --disabled-password \
+    --gecos "Odoo" \
+    --system \
+    odoo
 
-# Odoo Community Addons
-RUN mkdir -p /mnt && chown nginx:nginx -R /mnt
-COPY --chown=nginx:nginx --from=builder /mnt/addons/community /mnt/addons/community
+# Copy all necessary code, script, and config
+COPY --from=builder --chown=odoo:odoo /mnt /mnt
+COPY --from=builder --chown=odoo:odoo /entrypoint.sh /entrypoint.sh
+COPY --chown=odoo:odoo /etc/odoo/odoo.conf /etc/odoo/odoo.conf
+COPY --chown=odoo:odoo /usr/local/bin/write-config.py /usr/local/bin/write-config.py
+RUN sed -i "s/set -e/set -e \nwrite-config.py/g" /entrypoint.sh
 
-# Copy config files
-COPY ./etc/nginx/http.d/default.conf /etc/nginx/http.d/default.conf
-COPY ./etc/odoo/odoo.conf /etc/odoo/odoo.conf
-
-# Copy entire supervisor configurations
-COPY ./etc/profile.d/odoo.sh /etc/profile.d/odoo.sh
-COPY ./etc/supervisord.conf /etc/supervisord.conf
-COPY ./etc/syslog-ng/conf.d/odoo.conf /etc/syslog-ng/conf.d/odoo.conf
-COPY ./etc/supervisor/conf.d/nginx.conf /etc/supervisor/conf.d/nginx.conf
-COPY ./etc/supervisor/conf.d/odoo.conf /etc/supervisor/conf.d/odoo.conf
-
-# Copy init script
-COPY ./write_config.py write_config.py
-COPY ./entrypoint.sh /entrypoint.sh
-
-# # Expose web service
-EXPOSE 8080
-
+# Expose web service
+USER odoo
+EXPOSE 8069 8072
 ENTRYPOINT ["/entrypoint.sh"]
+CMD ["odoo"]
