@@ -39,7 +39,7 @@ steps:
           --sensor-ipc-mode proxy \
           --tag $_AR_HOSTNAME/$PROJECT_ID/$_AR_NAME/$_VERSION_NAME:slim-$SHORT_SHA \
           --tag $_AR_HOSTNAME/$PROJECT_ID/$_AR_NAME/$_VERSION_NAME:slim \
-          --tag $$USERNAME/odoo:$_VERSION_NAME-slim \
+          --tag $$USERNAME/$_AR_NAME:$_VERSION_NAME-slim \
           --sensor-ipc-endpoint $(docker network inspect bridge -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}' | cut -f1) $_AR_HOSTNAME/$PROJECT_ID/$_AR_NAME/$_VERSION_NAME:latest
     secretEnv: ['USERNAME']
     id: BuildSlim
@@ -52,7 +52,7 @@ steps:
   - name: gcr.io/cloud-builders/docker
     args:
       - push
-      - $$USERNAME/odoo:$_VERSION_NAME-slim
+      - $$USERNAME/$_AR_NAME:$_VERSION_NAME-slim
     secretEnv: ['USERNAME']
     id: PushPublic
 
