@@ -1,6 +1,12 @@
 steps:
   - name: gcr.io/cloud-builders/docker
     args:
+      - login
+      - --username=$$USERNAME
+      - --password=$$PASSWORD
+    secretEnv: ['USERNAME', 'PASSWORD']
+  - name: gcr.io/cloud-builders/docker
+    args:
       - build
       - -t
       - >-
@@ -33,14 +39,29 @@ steps:
           --sensor-ipc-mode proxy \
           --tag $_AR_HOSTNAME/$PROJECT_ID/$_AR_NAME/$_VERSION_NAME:slim-$SHORT_SHA \
           --tag $_AR_HOSTNAME/$PROJECT_ID/$_AR_NAME/$_VERSION_NAME:slim \
+          --tag $$USERNAME/odoo:$_VERSION_NAME-slim \
           --sensor-ipc-endpoint $(docker network inspect bridge -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}' | cut -f1) $_AR_HOSTNAME/$PROJECT_ID/$_AR_NAME/$_VERSION_NAME:latest
+    secretEnv: ['USERNAME']
     id: BuildSlim
   - name: gcr.io/cloud-builders/docker
     args:
       - push
       - $_AR_HOSTNAME/$PROJECT_ID/$_AR_NAME/$_VERSION_NAME
       - --all-tags
-    id: Push
+    id: PushPrivate
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - $$USERNAME/odoo:$_VERSION_NAME-slim
+    secretEnv: ['USERNAME']
+    id: PushPublic
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/DOCKERHUB_USERNAME/versions/latest
+      env: 'USERNAME'
+    - versionName: projects/$PROJECT_ID/secrets/DOCKERHUB_PASSWORD/versions/latest
+      env: 'PASSWORD'
 
 options:
   substitutionOption: ALLOW_LOOSE
