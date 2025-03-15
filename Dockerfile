@@ -110,6 +110,9 @@ RUN apk add -q --no-cache \
     bash \
     fontconfig \
     font-noto-cjk \
+    libjpeg \
+    libjpeg-turbo-dev \
+    libpng \
     libpq \
     libxrender \
     sassc
