@@ -3,7 +3,7 @@ steps:
     args:
       - login
       - --username=$$USERNAME
-      - --password-stdin=$$PASSWORD
+      - --password=$$PASSWORD
     secretEnv: ['USERNAME', 'PASSWORD']
   - name: gcr.io/cloud-builders/docker
     args:
