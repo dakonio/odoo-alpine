@@ -15,7 +15,7 @@ steps:
         if [ ! -z "${_ODOO_SHA}" ]; then \
           odoo_commit_sha=${_ODOO_SHA}; \
         else \
-          odoo_commit_sha=$(curl -s -X GET "https://api.github.com/repos/odoo/odoo/commits/${_ODOO_VERSION}" | python3 -c "import sys, json; print(json.load(sys.stdin)['sha'][:7])"); \
+          odoo_commit_sha=$(curl -s -X GET "https://api.github.com/repos/odoo/odoo/commits/${_ODOO_VERSION}" | python3 -c "import sys, json; print(json.load(sys.stdin)['sha'])"); \
         fi
         docker build --build-arg ODOO_SHA=${odoo_commit_sha} -t ${BUILD_ID} . -f Dockerfile
   - id: Sliming
@@ -27,7 +27,7 @@ steps:
         if [ ! -z "${_ODOO_SHA}" ]; then \
           odoo_commit_sha=${_ODOO_SHA}; \
         else \
-          odoo_commit_sha=$(curl -s -X GET "https://api.github.com/repos/odoo/odoo/commits/${_ODOO_VERSION}" | python3 -c "import sys, json; print(json.load(sys.stdin)['sha'][:7])"); \
+          odoo_commit_sha=$(curl -s -X GET "https://api.github.com/repos/odoo/odoo/commits/${_ODOO_VERSION}" | python3 -c "import sys, json; print(json.load(sys.stdin)['sha'])"); \
         fi
         curl -L -k -o ds.tar.gz https://downloads.dockerslim.com/releases/latest/dist_linux.tar.gz
         tar -xvf ds.tar.gz
@@ -45,7 +45,7 @@ steps:
           --sensor-ipc-mode proxy \
           --tag ${_REPOSITORY}:${_ODOO_VERSION} \
           --tag ${_REPOSITORY}:${_ODOO_VERSION}-latest \
-          --tag ${_REPOSITORY}:${_ODOO_VERSION}-${odoo_commit_sha} \
+          --tag ${_REPOSITORY}:${_ODOO_VERSION}-$(echo ${odoo_commit_sha} | cut -c -7) \
           --sensor-ipc-endpoint $(docker network inspect bridge -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}' | cut -f1) \
           ${BUILD_ID}
   - id: Push
