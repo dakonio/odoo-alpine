@@ -55,9 +55,9 @@ steps:
 # options:
 #   substitutionOption: ALLOW_LOOSE
 
-# substitutions:
-#   _REPOSITORY: dakonio/odoo
-#   _ODOO_VERSION: 14.0
+substitutions:
+  _REPOSITORY: dakonio/odoo
+  _ODOO_VERSION: 14.0
 
 # availableSecrets:
 #   secretManager:
