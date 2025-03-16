@@ -34,8 +34,8 @@ steps:
           --http-probe=false \
           --sensor-ipc-mode proxy \
           --tag ${_REPOSITORY}:${_ODOO_VERSION} \
-          --tag ${_REPOSITORY}:${_ODOO_VERSION-latest \
-          --tag ${_REPOSITORY}:${_ODOO_VERSION-${_ODOO_COMMIT_SHA} \
+          --tag ${_REPOSITORY}:${_ODOO_VERSION}-latest \
+          --tag ${_REPOSITORY}:${_ODOO_VERSION}-${_ODOO_COMMIT_SHA} \
           --sensor-ipc-endpoint $(docker network inspect bridge -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}' | cut -f1) \
           ${BUILD_ID}
   - id: Push
