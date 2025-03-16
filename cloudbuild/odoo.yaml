@@ -18,8 +18,8 @@ steps:
     args:
       - -c
       - |
-        export _ODOO_COMMIT_SHA=$(curl -s -X GET "https://api.github.com/repos/odoo/odoo/commits/${_ODOO_VERSION}" | python3 -c "import sys, json; print(json.load(sys.stdin)['sha'][:7])")
-        echo ${_ODOO_COMMIT_SHA}
+        odoo_commit_sha=$(curl -s -X GET "https://api.github.com/repos/odoo/odoo/commits/${_ODOO_VERSION}" | python3 -c "import sys, json; print(json.load(sys.stdin)['sha'][:7])")
+        echo ${odoo_commit_sha}
   # - id: Push
   #   name: gcr.io/cloud-builders/docker
   #   entrypoint: 'bash'
