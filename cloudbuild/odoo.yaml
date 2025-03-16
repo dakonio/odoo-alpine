@@ -57,7 +57,7 @@ steps:
 
 substitutions:
   _REPOSITORY: dakonio/odoo
-  _ODOO_VERSION: 14.0
+  _ODOO_VERSION: "14.0"
 
 # availableSecrets:
 #   secretManager:
