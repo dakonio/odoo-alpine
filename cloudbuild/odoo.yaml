@@ -11,7 +11,7 @@ steps:
     entrypoint: 'bash'
     args:
       - -c
-      - build -t ${BUILD_ID} . -f Dockerfile
+      - docker build -t ${BUILD_ID} . -f Dockerfile
   - id: Sliming
     name: gcr.io/cloud-builders/docker
     entrypoint: 'bash'
