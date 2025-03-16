@@ -7,61 +7,61 @@ steps:
       - |
         commit_id=$(curl -X GET "https://api.github.com/repos/odoo/odoo/commits/${_ODOO_VERSION}" | jq '.sha')
         echo $commit_id
-  - id: Login
-    name: gcr.io/cloud-builders/docker
-    entrypoint: 'bash'
-    args:
-      - -c
-      - docker login --username=$${USERNAME} --password=$${PASSWORD}
-    secretEnv: ['USERNAME', 'PASSWORD']
-  - id: Build
-    name: gcr.io/cloud-builders/docker
-    entrypoint: 'bash'
-    args:
-      - -c
-      - build -t ${BUILD_ID} . -f Dockerfile
-  - id: Sliming
-    name: gcr.io/cloud-builders/docker
-    entrypoint: 'bash'
-    args:
-      - -c
-      - |
-        curl -L -k -o ds.tar.gz https://downloads.dockerslim.com/releases/latest/dist_linux.tar.gz
-        tar -xvf ds.tar.gz
-        mv dist_linux/slim /usr/local/bin/
-        mv dist_linux/slim-sensor /usr/local/bin/
-        slim build \
-          --include-path /bin \
-          --include-path /etc \
-          --include-path /lib \
-          --include-path /mnt \
-          --include-path /usr \
-          --include-path /var \
-          --include-path /entrypoint.sh \
-          --http-probe=false \
-          --sensor-ipc-mode proxy \
-          --tag ${_REPOSITORY}:${_ODOO_VERSION} \
-          --tag ${_REPOSITORY}:${_ODOO_VERSION-latest \
-          --tag ${_REPOSITORY}:${_ODOO_VERSION-<xx> \
-          --sensor-ipc-endpoint $(docker network inspect bridge -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}' | cut -f1) \
-          ${BUILD_ID}
-  - id: Push
-    name: gcr.io/cloud-builders/docker
-    entrypoint: 'bash'
-    args:
-      - -c
-      - docker push ${_REPOSITORY} --all-tags
+#   - id: Login
+#     name: gcr.io/cloud-builders/docker
+#     entrypoint: 'bash'
+#     args:
+#       - -c
+#       - docker login --username=$${USERNAME} --password=$${PASSWORD}
+#     secretEnv: ['USERNAME', 'PASSWORD']
+#   - id: Build
+#     name: gcr.io/cloud-builders/docker
+#     entrypoint: 'bash'
+#     args:
+#       - -c
+#       - build -t ${BUILD_ID} . -f Dockerfile
+#   - id: Sliming
+#     name: gcr.io/cloud-builders/docker
+#     entrypoint: 'bash'
+#     args:
+#       - -c
+#       - |
+#         curl -L -k -o ds.tar.gz https://downloads.dockerslim.com/releases/latest/dist_linux.tar.gz
+#         tar -xvf ds.tar.gz
+#         mv dist_linux/slim /usr/local/bin/
+#         mv dist_linux/slim-sensor /usr/local/bin/
+#         slim build \
+#           --include-path /bin \
+#           --include-path /etc \
+#           --include-path /lib \
+#           --include-path /mnt \
+#           --include-path /usr \
+#           --include-path /var \
+#           --include-path /entrypoint.sh \
+#           --http-probe=false \
+#           --sensor-ipc-mode proxy \
+#           --tag ${_REPOSITORY}:${_ODOO_VERSION} \
+#           --tag ${_REPOSITORY}:${_ODOO_VERSION-latest \
+#           --tag ${_REPOSITORY}:${_ODOO_VERSION-<xx> \
+#           --sensor-ipc-endpoint $(docker network inspect bridge -f '{{range .IPAM.Config}}{{.Gateway}}{{end}}' | cut -f1) \
+#           ${BUILD_ID}
+#   - id: Push
+#     name: gcr.io/cloud-builders/docker
+#     entrypoint: 'bash'
+#     args:
+#       - -c
+#       - docker push ${_REPOSITORY} --all-tags
 
-options:
-  substitutionOption: ALLOW_LOOSE
+# options:
+#   substitutionOption: ALLOW_LOOSE
 
-substitutions:
-  _REPOSITORY: dakonio/odoo
-  _ODOO_VERSION: 14.0
+# substitutions:
+#   _REPOSITORY: dakonio/odoo
+#   _ODOO_VERSION: 14.0
 
-availableSecrets:
-  secretManager:
-    - versionName: projects/${PROJECT_ID}/secrets/DOCKERHUB_USERNAME/versions/latest
-      env: 'USERNAME'
-    - versionName: projects/${PROJECT_ID}/secrets/DOCKERHUB_PASSWORD/versions/latest
-      env: 'PASSWORD'
+# availableSecrets:
+#   secretManager:
+#     - versionName: projects/${PROJECT_ID}/secrets/DOCKERHUB_USERNAME/versions/latest
+#       env: 'USERNAME'
+#     - versionName: projects/${PROJECT_ID}/secrets/DOCKERHUB_PASSWORD/versions/latest
+#       env: 'PASSWORD'
