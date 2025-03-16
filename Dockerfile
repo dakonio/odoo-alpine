@@ -3,9 +3,11 @@ LABEL maintainer="fanani.mi@gmail.com"
 
 RUN echo "Build Odoo Community Edition"
 
+ARG ODOO_SHA
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
 ENV ODOO_VERSION 18.0
+ENV ODOO_SHA ${ODOO_SHA}
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_RC_GROUPS options
 
@@ -16,6 +18,7 @@ RUN apk add -q --no-cache \
     bash \
     build-base \
     ca-certificates \
+    curl \
     jpeg-dev \
     libev-dev \
     libevent-dev \
@@ -46,8 +49,17 @@ RUN apk add -q --no-cache \
 RUN mkdir /mnt/addons
 
 # Add Odoo Community
-ADD https://github.com/odoo/odoo/archive/refs/heads/${ODOO_VERSION}.zip .
-RUN unzip -qq ${ODOO_VERSION}.zip && cd odoo-${ODOO_VERSION} && \
+RUN if [ ! -z "${ODOO_SHA}" ]; then \
+        curl -J -L -s -o odoo.zip https://github.com/odoo/odoo/archive/${ODOO_SHA}.zip; \
+    else \
+        curl -J -L -s -o odoo.zip https://github.com/odoo/odoo/archive/${ODOO_VERSION}.zip; \
+    fi
+RUN unzip -qq odoo.zip && \
+    if [ ! -z "${ODOO_SHA}" ]; then \
+        cd odoo-${ODOO_SHA}; \
+    else \
+        cd odoo-${ODOO_VERSION}; \
+    fi && \
     pip3 install -q --upgrade pip && \
     pip3 install -q --upgrade setuptools && \
     echo 'INPUT ( libldap.so )' > /usr/lib/libldap_r.so && \
@@ -68,9 +80,11 @@ RUN find /usr/local \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*
 
 FROM python:3.12-alpine AS main
 
+ARG ODOO_SHA
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
 ENV ODOO_VERSION 18.0
+ENV ODOO_SHA ${ODOO_SHA}
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_RC_GROUPS options
 
