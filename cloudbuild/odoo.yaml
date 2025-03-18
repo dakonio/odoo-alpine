@@ -37,7 +37,6 @@ steps:
           --include-path /bin \
           --include-path /etc \
           --include-path /lib \
-          --include-path /mnt \
           --include-path /sbin \
           --include-path /usr \
           --include-path /var \
@@ -58,6 +57,7 @@ steps:
 
 options:
   substitutionOption: ALLOW_LOOSE
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
 
 substitutions:
   _REPOSITORY: 'dakonio/odoo'
