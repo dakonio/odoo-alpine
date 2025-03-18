@@ -20,8 +20,6 @@ services:
     tty: true
     depends_on:
       - odoo17-ce-db
-    volumes:
-      - odoo17-ce-erp-data:/var/lib/odoo
     platform: linux/amd64
 
   odoo17-ce-web:
@@ -37,4 +35,3 @@ services:
 volumes:
   odoo17-ce-db-data:
     driver: local
-  odoo17-ce-erp-data: {}
