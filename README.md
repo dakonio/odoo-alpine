@@ -1,4 +1,4 @@
-# Dakon Slim Odoo Image
+# Odoo Slim Image
 
 An alternate Odoo image to enhance security, boost performance, and streamline operations effectively.
 
@@ -17,12 +17,12 @@ An alternate Odoo image to enhance security, boost performance, and streamline o
 
 ## Environment Variable
 
-This image's environment variable is dynamic; using the prefix `OPTIONS__<CONFIG_KEY>,` it will be automatically converted to `/etc/odoo.conf`. Here is an example:
+This image's environment variable is dynamic; the prefix `OPTIONS__<CONFIG_KEY> will automatically be converted to `/etc/odoo.conf`. Here is an example:
 
 ```
 OPTIONS__ADMIN_PASSWD=secret
 OPTIONS__DATA_DIR=/var/lib/odoo
-OPTIONS__ADDONS_PATH=/mnt/addons/community
+OPTIONS__ADDONS_PATH=/mnt/addons/custom-addons
 OPTIONS__LOG_HANDLER=:INFO
 OPTIONS__LOG_LEVEL=info
 OPTIONS__DB_HOST=localhost
@@ -40,7 +40,7 @@ It will be converted on `/etc/odoo/odoo.conf` as:
 [options]
 admin_passwd = secret
 data_dir = /var/lib/odoo
-addons_path = /mnt/addons/community
+addons_path = /mnt/addons/custom-addons
 server_wide_modules = base,web
 log_handler = :INFO
 log_level = info
@@ -86,7 +86,7 @@ services:
     environment:
       - OPTIONS__ADMIN_PASSWD=secret
       - OPTIONS__DATA_DIR=/var/lib/odoo
-      - OPTIONS__ADDONS_PATH=/mnt/addons/community
+      - OPTIONS__ADDONS_PATH=/mnt/addons/custom-addons
       - OPTIONS__LOG_HANDLER=:INFO
       - OPTIONS__LOG_LEVEL=info
       - OPTIONS__DB_HOST=db
@@ -101,7 +101,7 @@ services:
     links:
       - db
     volumes:
-      - odoo-data:/mnt
+      - ./custom-addons:/mnt/addons/custom-addons:ro
     platform: linux/amd64
 
 volumes:
