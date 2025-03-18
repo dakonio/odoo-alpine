@@ -37,7 +37,6 @@ steps:
           --include-path /bin \
           --include-path /etc \
           --include-path /lib \
-          --include-path /mnt \
           --include-path /sbin \
           --include-path /usr \
           --include-path /var \
