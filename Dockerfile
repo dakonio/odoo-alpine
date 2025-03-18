@@ -46,7 +46,7 @@ RUN apk add -q --no-cache \
     zlib-dev
 
 # Create addons directory
-RUN mkdir /mnt/addons
+RUN mkdir -p /var/lib/odoo
 
 # Add Odoo Community
 RUN if [ ! -z "${ODOO_SHA}" ]; then \
@@ -65,8 +65,8 @@ RUN unzip -qq odoo.zip && \
     echo 'INPUT ( libldap.so )' > /usr/lib/libldap_r.so && \
     pip3 install -q --no-cache-dir -r requirements.txt && \
     python3 setup.py install && \
-    mkdir -p /mnt/addons/community && \
-    rsync -a --exclude={'__pycache__','*.pyc'} ./addons/ /mnt/addons/community/
+    mkdir -p /var/lib/odoo/addons/${ODOO_VERSION} && \
+    rsync -a --exclude={'__pycache__','*.pyc'} ./addons/ /var/lib/odoo/addons/${ODOO_VERSION}/
 
 # Add some scripts
 ADD https://raw.githubusercontent.com/odoo/docker/master/${ODOO_VERSION}/entrypoint.sh /entrypoint.sh
@@ -75,7 +75,7 @@ RUN chmod 755 /entrypoint.sh && chmod 755 /usr/local/bin/wait-for-psql.py
 
 # Clear Installation cache
 RUN find /usr/local \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + && \
-    find /mnt/addons \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + && \
+    find /var/lib/odoo \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + && \
     rm -rf /build
 
 FROM python:3.12-alpine AS main
@@ -130,7 +130,7 @@ RUN adduser \
     odoo
 
 # Copy all necessary code, script, and config
-COPY --from=builder --chown=odoo:odoo /mnt /mnt
+COPY --from=builder --chown=odoo:odoo /var/lib/odoo /var/lib/odoo
 COPY --from=builder --chown=odoo:odoo /entrypoint.sh /entrypoint.sh
 COPY --chown=odoo:odoo ./etc/odoo/odoo.conf /etc/odoo/odoo.conf
 COPY --chown=odoo:odoo ./usr/local/bin/write-config.py /usr/local/bin/write-config.py
