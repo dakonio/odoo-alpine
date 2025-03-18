@@ -57,6 +57,7 @@ steps:
 
 options:
   substitutionOption: ALLOW_LOOSE
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
 
 substitutions:
   _REPOSITORY: 'dakonio/odoo'
