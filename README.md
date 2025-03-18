@@ -1,4 +1,4 @@
-# Dakon Slim Odoo Image
+# Odoo Slim Image
 
 An alternate Odoo image to enhance security, boost performance, and streamline operations effectively.
 
@@ -17,7 +17,7 @@ An alternate Odoo image to enhance security, boost performance, and streamline o
 
 ## Environment Variable
 
-This image's environment variable is dynamic; using the prefix `OPTIONS__<CONFIG_KEY>,` it will be automatically converted to `/etc/odoo.conf`. Here is an example:
+This image's environment variable is dynamic; the prefix `OPTIONS__<CONFIG_KEY> will automatically be converted to `/etc/odoo.conf`. Here is an example:
 
 ```
 OPTIONS__ADMIN_PASSWD=secret
