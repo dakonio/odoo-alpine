@@ -17,7 +17,7 @@ An alternate Odoo image to enhance security, boost performance, and streamline o
 
 ## Environment Variable
 
-This image's environment variable is dynamic; the prefix `OPTIONS__<CONFIG_KEY> will automatically be converted to `/etc/odoo.conf`. Here is an example:
+This image's environment variable is dynamic; use the prefix `OPTIONS__<CONFIG_KEY>`
 
 ```
 OPTIONS__ADMIN_PASSWD=secret
@@ -82,7 +82,8 @@ services:
     image: dakonio/odoo
     container_name: odoo
     ports:
-      - "80:8080"
+      - "8069:8069"
+      - "8072:8072"
     environment:
       - OPTIONS__ADMIN_PASSWD=secret
       - OPTIONS__DATA_DIR=/var/lib/odoo
@@ -98,8 +99,6 @@ services:
       - OPTIONS__PROXY_MODE=True
     depends_on:
       - db
-    links:
-      - db
     volumes:
       - ./custom-addons:/mnt/addons/custom-addons:ro
     platform: linux/amd64
@@ -107,7 +106,6 @@ services:
 volumes:
   db-data:
     driver: local
-  odoo-data: {}
 ```
 
 Then, run the following command.
