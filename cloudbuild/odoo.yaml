@@ -61,7 +61,7 @@ options:
 
 substitutions:
   _REPOSITORY: 'dakonio/odoo'
-  _ODOO_VERSION: '18.0'
+  _ODOO_VERSION: '19.0'
   _ODOO_SHA: ''
 
 availableSecrets:

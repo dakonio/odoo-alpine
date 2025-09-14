@@ -1,4 +1,4 @@
-FROM python:3.12-alpine AS builder
+FROM python:3.13-alpine AS builder
 LABEL maintainer="fanani.mi@gmail.com"
 
 RUN echo "Build Odoo Community Edition"
@@ -6,7 +6,7 @@ RUN echo "Build Odoo Community Edition"
 ARG ODOO_SHA
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
-ENV ODOO_VERSION 18.0
+ENV ODOO_VERSION 19.0
 ENV ODOO_SHA ${ODOO_SHA}
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_RC_GROUPS options
@@ -78,12 +78,12 @@ RUN find /usr/local \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*
     find /var/lib/odoo \( -type d -a -name __pycache__ \) -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) -exec rm -rf '{}' + && \
     rm -rf /build
 
-FROM python:3.12-alpine AS main
+FROM python:3.13-alpine AS main
 
 ARG ODOO_SHA
 ENV LANG C.UTF-8
 ENV PYTHONUNBUFFERED 1
-ENV ODOO_VERSION 18.0
+ENV ODOO_VERSION 19.0
 ENV ODOO_SHA ${ODOO_SHA}
 ENV ODOO_RC /etc/odoo/odoo.conf
 ENV ODOO_RC_GROUPS options
@@ -94,15 +94,15 @@ COPY --from=builder /lib /lib
 COPY --from=builder /usr /usr
 
 # add wkhtmltopdf
-COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/wkhtmltopdf /bin/wkhtmltopdf
-COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/wkhtmltoimage /bin/wkhtmltoimage
-COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/libwkhtmltox.so /bin/libwkhtmltox.so
-COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/libwkhtmltox.so.0 /bin/libwkhtmltox.so.0
-COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/libwkhtmltox.so.0.12 /bin/libwkhtmltox.so.0.12
-COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /bin/libwkhtmltox.so.0.12.6 /bin/libwkhtmltox.so.0.12.6
-COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /lib/libssl.so.1.1 /lib/libssl.so.1.1
-COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /lib/libcrypto.so.1.1 /lib/libcrypto.so.1.1
-COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /usr/share/fonts /usr/share/fonts
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.13.5-0.12.6-full /bin/wkhtmltopdf /bin/wkhtmltopdf
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.13.5-0.12.6-full /bin/wkhtmltoimage /bin/wkhtmltoimage
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.13.5-0.12.6-full /bin/libwkhtmltox.so /bin/libwkhtmltox.so
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.13.5-0.12.6-full /bin/libwkhtmltox.so.0 /bin/libwkhtmltox.so.0
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.13.5-0.12.6-full /bin/libwkhtmltox.so.0.12 /bin/libwkhtmltox.so.0.12
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.13.5-0.12.6-full /bin/libwkhtmltox.so.0.12.6 /bin/libwkhtmltox.so.0.12.6
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.13.5-0.12.6-full /lib/libssl.so.1.1 /lib/libssl.so.1.1
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.13.5-0.12.6-full /lib/libcrypto.so.1.1 /lib/libcrypto.so.1.1
+COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.13.5-0.12.6-full /usr/share/fonts /usr/share/fonts
 
 # Install some dependencies
 RUN apk add -q --no-cache \
