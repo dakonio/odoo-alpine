@@ -114,6 +114,7 @@ RUN apk add -q --no-cache \
     libpng \
     libpq \
     libxrender \
+    libxslt-dev \
     sassc
 
 # prepare default user

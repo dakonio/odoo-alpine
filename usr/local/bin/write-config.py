@@ -30,16 +30,15 @@ for variable, value in os.environ.items():
         # skip invalid config
         pass
 
-config_maps = odoo_config.casts
 for section in ODOO_CONFIG_SECTIONS:
     for config in CONFIG_MAPPER[section]:
         value = ""
         try:
             # official odoo config
-            config_type = config_maps[config].type
-            if config_type == "int":
+            config_type = type(odoo_config._default_options[config])
+            if config_type == int:
                 value = int(CONFIG_MAPPER[section][config])
-            elif config_type == "float":
+            elif config_type == float:
                 value = float(CONFIG_MAPPER[section][config])
             else:
                 value = str(CONFIG_MAPPER[section][config])

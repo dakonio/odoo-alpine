@@ -1,37 +1,37 @@
 services:
 
-  odoo18-ce-db:
+  odoo19-ce-db:
     image: postgres:15
-    container_name: odoo18-ce-db
+    container_name: odoo19-ce-db
     ports:
       - "5432:5432"
     env_file:
       - .env
     volumes:
-      - odoo18-ce-db-data:$PGDATA
+      - odoo19-ce-db-data:$PGDATA
 
-  odoo18-ce-erp:
+  odoo19-ce-erp:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: odoo18-ce-erp
+    container_name: odoo19-ce-erp
     env_file:
       - .env
     tty: true
     depends_on:
-      - odoo18-ce-db
+      - odoo19-ce-db
     platform: linux/amd64
 
-  odoo18-ce-web:
+  odoo19-ce-web:
     image: nginx
-    container_name: odoo18-ce-web
+    container_name: odoo19-ce-web
     ports:
       - "80:8080"
     depends_on:
-      - odoo18-ce-erp
+      - odoo19-ce-erp
     volumes:
       - ./etc/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
 
 volumes:
-  odoo18-ce-db-data:
+  odoo19-ce-db-data:
     driver: local
