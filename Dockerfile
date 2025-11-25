@@ -18,8 +18,18 @@ RUN apk add -q --no-cache \
     bash \
     build-base \
     ca-certificates \
+    cairo \
+    cairo-dev \
     curl \
+    freetype \
+    freetype-dev \
+    g++ \
+    gcc \
+    harfbuzz-dev \
+    jpeg \
     jpeg-dev \
+    lcms2-dev \
+    libart-lgpl-dev \
     libev-dev \
     libevent-dev \
     libffi-dev \
@@ -37,11 +47,20 @@ RUN apk add -q --no-cache \
     libxml2-dev \
     libxrender \
     libxslt-dev \
+    linux-headers \
+    make \
+    musl-dev \
+    openjpeg-dev \
     openldap-dev \
+    pango-dev \
     postgresql-dev \
     py3-pip \
+    py3-setuptools \
+    py3-wheel \
     python3-dev \
     rsync \
+    tiff \
+    tiff-dev \
     zlib \
     zlib-dev
 
@@ -61,8 +80,10 @@ RUN unzip -qq odoo.zip && \
         cd odoo-${ODOO_VERSION}; \
     fi && \
     pip3 install -q --upgrade pip && \
-    pip3 install -q --upgrade setuptools && \
+    pip3 install -q --upgrade setuptools wheel && \
     echo 'INPUT ( libldap.so )' > /usr/lib/libldap_r.so && \
+    pip3 install --no-cache-dir cairocffi pybind11 pycairo rlPyCairo && \
+    pip3 install --no-cache-dir --no-binary=reportlab reportlab && \
     pip3 install -q --no-cache-dir -r requirements.txt && \
     python3 setup.py install && \
     mkdir -p /var/lib/odoo/addons/${ODOO_VERSION} && \
@@ -107,14 +128,28 @@ COPY --from=ghcr.io/surnet/alpine-wkhtmltopdf:3.12-0.12.6-full /usr/share/fonts 
 # Install some dependencies
 RUN apk add -q --no-cache \
     bash \
-    fontconfig \
+    ca-certificates \
+    cairo \
+    curl \
     font-noto-cjk \
+    fontconfig \
+    freetype \
+    jpeg \
     libjpeg \
-    libjpeg-turbo-dev \
     libpng \
     libpq \
+    libssl3 \
+    libstdc++ \
+    libx11 \
+    libxcb \
+    libxext \
     libxrender \
-    sassc
+    py3-pip \
+    py3-setuptools \
+    py3-wheel \
+    sassc \
+    tiff \
+    zlib
 
 # prepare default user
 RUN addgroup \
