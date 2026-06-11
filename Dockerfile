@@ -19,6 +19,7 @@ RUN apk add -q --no-cache \
     build-base \
     ca-certificates \
     curl \
+    expat-dev \
     jpeg-dev \
     libev-dev \
     libevent-dev \
