@@ -53,7 +53,6 @@ workers = 3
 proxy_mode = true
 ```
 
-
 ## How to use this image?
 
 
